@@ -2,26 +2,41 @@ class Message {
   final String text;
   final String? to;
   final String? from;
+  final String event;
 
-  Message({required this.text, this.to, this.from});
+  Message({
+    required this.text,
+    required this.event,
+    this.to,
+    this.from,
+  });
 
-  factory Message.fromJson(Map<String, dynamic> json) {
+  factory Message.fromJson(Map<String, dynamic>? json) {
+    // JSON-ni tekshirish va noto'g'ri ma'lumotlarni qaytarish
+    if (json == null || json['data'] == null || json['event'] == null) {
+      throw FormatException('Invalid JSON format for Message: $json');
+    }
+
     return Message(
-      text: json['text'],
-      to: json['to'],
-      from: json['from'],
+      text: json['data']['text'] as String? ?? 'No Text', // Default qiymat qo'shildi
+      event: json['event'] as String,
+      to: json['data']['to'] as String?,
+      from: json['data']['from'] as String?,
     );
   }
 
+
   Map<String, dynamic> toJson() {
+    final data = {'text': text};
+    if (to != null) data['to'] = to!;
+    if (from != null) data['from'] = from!;
+
     return {
-      'text': text,
-      'to': to,
-      'from': from,
+      'event': event,
+      'data': data,
     };
   }
 }
-
 class InfoPayload {
   final String event;
   final int totalClients;
@@ -31,8 +46,12 @@ class InfoPayload {
     required this.totalClients,
   });
 
+ factory InfoPayload.fromJson(Map<String, dynamic>? json) {
+    // JSON-ni tekshirish va noto'g'ri ma'lumotlarni qaytarish
+    if (json == null || json['event'] == null || json['totalClients'] == null) {
+      throw FormatException('Invalid JSON format for InfoPayload: $json');
+    }
 
-  factory InfoPayload.fromJson(Map<String, dynamic> json) {
     return InfoPayload(
       event: json['event'] as String,
       totalClients: json['totalClients'] as int,

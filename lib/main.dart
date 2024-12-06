@@ -1,8 +1,9 @@
+import 'package:chatting_app/providers/messageNotifier.dart';
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() => runApp(const MyApp());
+
+void main() => runApp(const ProviderScope(child: MyApp()));
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerWidget {
   const MyHomePage({
     super.key,
     required this.title,
@@ -28,23 +29,14 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    // MessageNotifier va xabar holatini olish
+    final messages = ref.watch(messageNotifierProvider);
+    final messageNotifier = ref.read(messageNotifierProvider.notifier);
 
-class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController _groupTextController = TextEditingController();
-  final TextEditingController _privateTextController = TextEditingController();
-  final TextEditingController _toController = TextEditingController();
-
-  final _channel = WebSocketChannel.connect(
-    Uri.parse('ws://localhost:3000'), // Serverga mos URL
-  );
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -60,12 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   TextFormField(
-                    controller: _privateTextController,
+                    controller: messageNotifier.privateTextController,
                     decoration: const InputDecoration(labelText: '개인 메시지를 입력하세요'),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
-                    controller: _toController,
+                    controller: messageNotifier.toController,
                     decoration: const InputDecoration(labelText: '받는 사람 ID를 입력하세요'),
                   ),
                   const SizedBox(height: 16),
@@ -74,22 +66,25 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   TextFormField(
-                    controller: _groupTextController,
+                    controller: messageNotifier.groupTextController,
                     decoration: const InputDecoration(labelText: '그룹 메시지를 입력하세요'),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            StreamBuilder(
-              stream: _channel.stream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                return Text(snapshot.hasData ? '${snapshot.data}' : 'No message received');
-              },
-            )
+            Expanded(
+              child: ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  return ListTile(
+                    title: Text(message.text),
+                    subtitle: Text(message.from ?? 'Unknown'),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -97,54 +92,18 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: _sendPrivateMessage,
+            onPressed: messageNotifier.sendPrivateMessage,
             tooltip: '개인 메시지 전송',
             child: const Icon(Icons.person),
           ),
           const SizedBox(height: 10),
           FloatingActionButton(
-            onPressed: _sendGroupMessage,
+            onPressed: messageNotifier.sendGroupMessage,
             tooltip: '그룹 메시지 전송',
             child: const Icon(Icons.group),
           ),
         ],
       ),
     );
-  }
-
-  // Private Message
-  void _sendPrivateMessage() {
-    if (_privateTextController.text.isNotEmpty && _toController.text.isNotEmpty) {
-      final message = {
-        'event': 'message',
-        'data': {
-          'text': _privateTextController.text,
-          'to': _toController.text,
-        }
-      };
-      _channel.sink.add(jsonEncode(message)); // JSON formatida yuborish
-    }
-  }
-
-  // Group Message
-  void _sendGroupMessage() {
-    if (_groupTextController.text.isNotEmpty) {
-      final message = {
-        'event': 'message',
-        'data': {
-          'text': _groupTextController.text,
-        }
-      };
-      _channel.sink.add(jsonEncode(message)); // JSON formatida yuborish
-    }
-  }
-
-  @override
-  void dispose() {
-    _channel.sink.close();
-    _groupTextController.dispose();
-    _privateTextController.dispose();
-    _toController.dispose();
-    super.dispose();
   }
 }
