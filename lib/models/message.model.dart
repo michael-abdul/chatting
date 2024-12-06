@@ -11,58 +11,39 @@ class Message {
     this.from,
   });
 
-  factory Message.fromJson(Map<String, dynamic>? json) {
-    // JSON-ni tekshirish va noto'g'ri ma'lumotlarni qaytarish
-    if (json == null || json['data'] == null || json['event'] == null) {
-      throw FormatException('Invalid JSON format for Message: $json');
+  factory Message.fromJson(Map<String, dynamic> json) {
+    // Tekshiruv: JSON tuzilmasi `data` maydoni bilan bo'lishi mumkin
+    if (json.containsKey('data')) {
+      return Message(
+        text: json['data']['text'] as String? ?? 'No Text',
+        event: json['event'] as String,
+        to: json['data']['to'] as String?,
+        from: json['data']['from'] as String?,
+      );
     }
 
-    return Message(
-      text: json['data']['text'] as String? ?? 'No Text', // Default qiymat qo'shildi
-      event: json['event'] as String,
-      to: json['data']['to'] as String?,
-      from: json['data']['from'] as String?,
-    );
-  }
-
-
-  Map<String, dynamic> toJson() {
-    final data = {'text': text};
-    if (to != null) data['to'] = to!;
-    if (from != null) data['from'] = from!;
-
-    return {
-      'event': event,
-      'data': data,
-    };
-  }
-}
-class InfoPayload {
-  final String event;
-  final int totalClients;
-
-  InfoPayload({
-    required this.event,
-    required this.totalClients,
-  });
-
- factory InfoPayload.fromJson(Map<String, dynamic>? json) {
-    // JSON-ni tekshirish va noto'g'ri ma'lumotlarni qaytarish
-    if (json == null || json['event'] == null || json['totalClients'] == null) {
-      throw FormatException('Invalid JSON format for InfoPayload: $json');
+    // Tekshiruv: JSON tuzilmasi to'g'ridan-to'g'ri `text` maydonini saqlashi mumkin
+    if (json.containsKey('text')) {
+      return Message(
+        text: json['text'] as String? ?? 'No Text',
+        event: json['event'] as String,
+        to: json['to'] as String?,
+        from: json['from'] as String?,
+      );
     }
 
-    return InfoPayload(
-      event: json['event'] as String,
-      totalClients: json['totalClients'] as int,
-    );
+    // JSON kutilgan formatga mos kelmasa
+    throw FormatException('Invalid JSON format for Message: $json');
   }
-
 
   Map<String, dynamic> toJson() {
     return {
       'event': event,
-      'totalClients': totalClients,
+      'data': {
+        'text': text,
+        if (to != null) 'to': to,
+        if (from != null) 'from': from,
+      }
     };
   }
 }
