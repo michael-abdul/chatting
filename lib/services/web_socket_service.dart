@@ -2,46 +2,51 @@ import 'dart:convert';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:chatting_app/models/message.model.dart';
+
 class WebSocketService {
   final WebSocketChannel _channel;
-  Stream<Message>? _broadcastStream;
 
-  WebSocketService(String url) : _channel = WebSocketChannel.connect(Uri.parse(url));
+  WebSocketService(String url, String userName)
+      : _channel = WebSocketChannel.connect(Uri.parse(url)) {
+    _sendRegisterEvent(userName);
+  }
 
-Stream<dynamic> get messagesStream {
-  return _channel.stream.asBroadcastStream().map((data) {
+  // Foydalanuvchi ismini `register` eventi orqali jo'natish
+  void _sendRegisterEvent(String userName) {
     try {
-      print("Raw data received: $data");
-      final decodedData = jsonDecode(data);
+      final registerMessage = jsonEncode({
+        'event': 'register',
+        'name': userName,
+      });
+      _channel.sink.add(registerMessage);
+      print("Register event sent: $registerMessage");
+    } catch (e) {
+      print("Error sending register event: $e");
+    }
+  }
 
-      if (decodedData['event'] == 'message') {
-        return Message.fromJson(decodedData); // Message turi uchun qaytariladi
-      } else if (decodedData['event'] == 'info') {
-        print("Info event received: ${decodedData['totalClients']} clients online.");
-        return decodedData; // Info xabarlari uchun qaytariladi
-      } else {
-        print('Unhandled event type: ${decodedData['event']}');
+  Stream<dynamic> get messagesStream {
+    return _channel.stream.asBroadcastStream().map((data) {
+      try {
+        print("Raw data received: $data");
+        final decodedData = jsonDecode(data);
+        return decodedData;
+      } catch (e) {
+        print("Error decoding message: $e");
         return null;
       }
-    } catch (e) {
-      print('Error decoding message: $e');
-      print('Raw data: $data');
-      rethrow;
-    }
-  }).where((event) => event != null); // Faqat null bo'lmagan xabarlarni streamdan o'tkazadi
-}
-
-
-void sendMessage(Message message) {
-  try {
-    final encodedMessage = jsonEncode(message.toJson());
-    _channel.sink.add(encodedMessage); // JSON formatidagi ma'lumotni yuborish
-    print("Message sent: $encodedMessage");
-  } catch (e) {
-    print('Error sending message: $e');
+    }).where((event) => event != null);
   }
-}
 
+  void sendMessage(Message message) {
+    try {
+      final encodedMessage = jsonEncode(message.toJson());
+      _channel.sink.add(encodedMessage);
+      print("Message sent: $encodedMessage");
+    } catch (e) {
+      print("Error sending message: $e");
+    }
+  }
 
   void close() {
     _channel.sink.close();

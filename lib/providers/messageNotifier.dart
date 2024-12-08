@@ -7,15 +7,24 @@ class MessageNotifier extends StateNotifier<List<Message>> {
   final WebSocketService _webSocketService;
 
   final TextEditingController groupTextController = TextEditingController();
+List<String> connectedClients = [];
 
-  MessageNotifier(this._webSocketService) : super([]) {
+   MessageNotifier(this._webSocketService) : super([]) {
     _webSocketService.messagesStream.listen((event) {
-      if (event is Message) {
-        state = [...state, event];
+      if (event is Map<String, dynamic> && event['event'] == 'message') {
+        // Xabarni `Message` obyekti sifatida qayta ishlash
+        final message = Message.fromJson(event);
+        state = [...state, message]; // Yangi xabarni qo'shish
+        print("New message added: ${message.text}, from: ${message.from}, to: ${message.to}");
       } else if (event is Map<String, dynamic> && event['event'] == 'info') {
+        connectedClients = List<String>.from(event['clients'] ?? []);
+        print("Connected clients updatedNotifier: $connectedClients");
         print("Info received: ${event['totalClients']} clients online.");
       }
     });
+  }
+    List<String> getClients() {
+    return connectedClients;
   }
 
 
@@ -30,6 +39,16 @@ class MessageNotifier extends StateNotifier<List<Message>> {
       _webSocketService.sendMessage(message);
       groupTextController.clear();
     }
+  }
+  void sendPrivateMessage(String from, String to, String text) {
+    final message = Message(
+      text: text,
+      event: 'message',
+      from: from,
+      to: to,
+    );
+    print("Sending private message: ${message.text}, from: ${message.from}, to: ${message.to}");
+    _webSocketService.sendMessage(message);
   }
 
   void close() {

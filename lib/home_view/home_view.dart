@@ -1,14 +1,20 @@
+import 'package:chatting_app/client_list_view.dart/client_list_view.dart';
 import 'package:chatting_app/goup_chat/group_chat_view.dart';
+import 'package:chatting_app/providers/web_socket_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
-class HomeView extends StatelessWidget {
+
+class HomeView extends ConsumerWidget {
   final String name;
 
   const HomeView({Key? key, required this.name}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final messageNotifier = ref.watch(messageNotifierProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Home View'),
@@ -43,9 +49,12 @@ class HomeView extends StatelessWidget {
                 leading: Icon(Icons.person),
                 title: Text('1:1 Chat'),
                 onTap: () {
-                  // 1:1 chatga o'tish funksiyasi
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('1:1 Chat clicked!')),
+                  final connectedClients = messageNotifier.getClients();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ClientsListView(clients: connectedClients, currentUserName: name,),
+                    ),
                   );
                 },
               ),
