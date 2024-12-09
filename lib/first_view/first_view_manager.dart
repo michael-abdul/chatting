@@ -8,7 +8,12 @@ mixin class FirstViewManager {
   final TextEditingController nameController = TextEditingController();
 
   navigateToChatView(BuildContext context, WidgetRef ref) {
-    final name = nameController.text.isNotEmpty ? nameController.text : "Unknown";
+     final name = nameController.text.trim();
+  if (name.isEmpty) {
+    print("Name is empty. Please enter a valid name.");
+    return;
+  }
+  print("Name entered: $name");
     ref.read(userNameProvider.notifier).state = name; // Foydalanuvchi ismini o'rnatish
     Navigator.push(
       context,

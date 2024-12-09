@@ -5,7 +5,7 @@ import 'package:chatting_app/models/message.model.dart';
 import 'package:chatting_app/services/web_socket_service.dart';
 class MessageNotifier extends StateNotifier<List<Message>> {
   final WebSocketService _webSocketService;
-
+ final Map<String, String> clientMap = {};
   final TextEditingController groupTextController = TextEditingController();
 List<String> connectedClients = [];
 
@@ -17,12 +17,11 @@ MessageNotifier(this._webSocketService) : super([]) {
         // Xabarni `Message` obyekti sifatida qayta ishlash
         final message = Message.fromJson(event);
         state = [...state, message]; // Yangi xabarni qo'shish
-        print("New message added: ${message.text}, from: ${message.from}, to: ${message.to}");
+      print("Notifier state updated: $state");
       } else if (event['event'] == 'info') {
         // Mijozlar ro'yxatini yangilash
         connectedClients = List<String>.from(event['clients'] ?? []);
         print("Connected clients updatedNotifier: $connectedClients");
-        print("Info received: ${event['totalClients']} clients online.");
         state = [...state]; // State'ni yangilash
       }
     } else {
@@ -44,7 +43,7 @@ List<String> getClients() {
         event: 'message',
         from: name,
       );
-        print("Sending message: ${message.text}, from: ${message.from}");
+   print("Message sent: $message");
       _webSocketService.sendMessage(message);
       groupTextController.clear();
     }

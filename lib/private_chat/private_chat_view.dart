@@ -19,10 +19,7 @@ class ChatView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Faqat currentUserName va targetUserName uchun filtrlangan xabarlar
-    final messages = ref.watch(messageNotifierProvider).where((message) {
-      return (message.from == currentUserName && message.to == targetUserName) ||
-          (message.from == targetUserName && message.to == currentUserName);
-    }).toList();
+    final messages = ref.watch(messageNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,14 +36,29 @@ class ChatView extends ConsumerWidget {
 
                 return Align(
                   alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isSender ? Colors.blue[200] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(message.text),
+                  child: Column(
+                    crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    children: [
+                      // Foydalanuvchi nomini (username) chiqarish
+                      if (!isSender) // Boshqa foydalanuvchining username'ini ko'rsatish
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0, bottom: 5.0),
+                          child: Text(
+                            message.from!, // Foydalanuvchi nomi
+                            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                          ),
+                        ),
+                      // Xabarni ko'rsatish
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isSender ? Colors.blue[200] : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(message.text),
+                      ),
+                    ],
                   ),
                 );
               },
