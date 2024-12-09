@@ -9,23 +9,32 @@ class MessageNotifier extends StateNotifier<List<Message>> {
   final TextEditingController groupTextController = TextEditingController();
 List<String> connectedClients = [];
 
-   MessageNotifier(this._webSocketService) : super([]) {
-    _webSocketService.messagesStream.listen((event) {
-      if (event is Map<String, dynamic> && event['event'] == 'message') {
+MessageNotifier(this._webSocketService) : super([]) {
+  _webSocketService.messagesStream.listen((event) {
+    // Kelgan voqeani tekshirish
+    if (event is Map<String, dynamic>) {
+      if (event['event'] == 'message') {
         // Xabarni `Message` obyekti sifatida qayta ishlash
         final message = Message.fromJson(event);
         state = [...state, message]; // Yangi xabarni qo'shish
         print("New message added: ${message.text}, from: ${message.from}, to: ${message.to}");
-      } else if (event is Map<String, dynamic> && event['event'] == 'info') {
+      } else if (event['event'] == 'info') {
+        // Mijozlar ro'yxatini yangilash
         connectedClients = List<String>.from(event['clients'] ?? []);
         print("Connected clients updatedNotifier: $connectedClients");
         print("Info received: ${event['totalClients']} clients online.");
+        state = [...state]; // State'ni yangilash
       }
-    });
-  }
-    List<String> getClients() {
-    return connectedClients;
-  }
+    } else {
+      print("Unknown event type received: $event");
+    }
+  });
+}
+
+List<String> getClients() {
+  // Hozirgi ulangan mijozlarni qaytaradi
+  return connectedClients;
+}
 
 
   void sendGroupMessage(String name) {
