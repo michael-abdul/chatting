@@ -1,25 +1,27 @@
 import 'package:chatting_app/providers/web_socket_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chatting_app/models/message.model.dart';
-import 'package:chatting_app/providers/messageNotifier.dart';
 
 class ChatView extends ConsumerWidget {
   final String currentUserName;
   final String targetUserName;
 
   ChatView({
-    Key? key,
+    super.key,
     required this.currentUserName,
     required this.targetUserName,
-  }) : super(key: key);
+  });
 
   final TextEditingController _messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Faqat currentUserName va targetUserName uchun filtrlangan xabarlar
-    final messages = ref.watch(messageNotifierProvider);
+    // Filter messages for 1:1 chat (event == 'message')
+    final messages = ref.watch(messageNotifierProvider).where((message) {
+      return message.event == 'message' && // Ensure the event is 'message'
+          ((message.from == currentUserName && message.to == targetUserName) ||
+              (message.from == targetUserName && message.to == currentUserName));
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -39,16 +41,16 @@ class ChatView extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
-                      // Foydalanuvchi nomini (username) chiqarish
-                      if (!isSender) // Boshqa foydalanuvchining username'ini ko'rsatish
+                      // Show the target user's name for their messages
+                      if (!isSender)
                         Padding(
                           padding: const EdgeInsets.only(left: 10.0, bottom: 5.0),
                           child: Text(
-                            message.from!, // Foydalanuvchi nomi
+                            targetUserName,
                             style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                           ),
                         ),
-                      // Xabarni ko'rsatish
+                      // Display the message
                       Container(
                         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                         padding: const EdgeInsets.all(10),
@@ -71,14 +73,14 @@ class ChatView extends ConsumerWidget {
                 Expanded(
                   child: TextField(
                     controller: _messageController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Type a message...',
                       border: OutlineInputBorder(),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: const Icon(Icons.send),
                   onPressed: () {
                     final text = _messageController.text.trim();
                     if (text.isNotEmpty) {

@@ -13,7 +13,7 @@ MessageNotifier(this._webSocketService) : super([]) {
   _webSocketService.messagesStream.listen((event) {
     // Kelgan voqeani tekshirish
     if (event is Map<String, dynamic>) {
-      if (event['event'] == 'message') {
+      if  (event['event'] == 'message' || event['event'] == 'groupmessage') {
         // Xabarni `Message` obyekti sifatida qayta ishlash
         final message = Message.fromJson(event);
         state = [...state, message]; // Yangi xabarni qo'shish
@@ -40,7 +40,7 @@ List<String> getClients() {
     if (groupTextController.text.isNotEmpty) {
       final message = Message(
         text: groupTextController.text,
-        event: 'message',
+        event: 'groupmessage',
         from: name,
       );
    print("Message sent: $message");

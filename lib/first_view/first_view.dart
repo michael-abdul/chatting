@@ -15,7 +15,7 @@ class FirstView extends ConsumerWidget with FirstViewManager {
             padding: const EdgeInsets.only(left: 20, right: 20),
             child: TextFormField(
               controller: nameController,
-              decoration: InputDecoration(hintText: 'Enter your name'),
+              decoration: const InputDecoration(hintText: 'Enter your name'),
             ),
           ),
           Padding(

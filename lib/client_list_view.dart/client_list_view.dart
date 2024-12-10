@@ -6,16 +6,16 @@ class ClientsListView extends StatelessWidget {
   final String currentUserName; // Joriy foydalanuvchi nomi
 
   const ClientsListView({
-    Key? key,
+    super.key,
     required this.clients,
     required this.currentUserName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Connected Clients'),
+        title: const Text('Connected Clients'),
       ),
       body: ListView.builder(
         itemCount: clients.length,
@@ -23,10 +23,10 @@ class ClientsListView extends StatelessWidget {
           final client = clients[index];
           if (client == currentUserName) {
             // Joriy foydalanuvchini ro'yxatda ko'rsatmaymiz
-            return SizedBox.shrink();
+            return const SizedBox.shrink();
           }
           return ListTile(
-            leading: Icon(Icons.person),
+            leading: const Icon(Icons.person),
             title: Text(client),
             onTap: () {
               // 1:1 chatga o'tish uchun navigatsiya qilish

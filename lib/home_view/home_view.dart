@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class HomeView extends ConsumerWidget {
   final String name;
 
-  const HomeView({Key? key, required this.name}) : super(key: key);
+  const HomeView({super.key, required this.name});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,7 +17,7 @@ class HomeView extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home View'),
+        title: const Text('Home View'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -26,13 +26,13 @@ class HomeView extends ConsumerWidget {
           children: [
             Text(
               'Welcome, $name!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Card(
               child: ListTile(
-                leading: Icon(Icons.group),
-                title: Text('Group Chat'),
+                leading: const Icon(Icons.group),
+                title: const Text('Group Chat'),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -43,11 +43,11 @@ class HomeView extends ConsumerWidget {
                 },
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Card(
               child: ListTile(
-                leading: Icon(Icons.person),
-                title: Text('1:1 Chat'),
+                leading: const Icon(Icons.person),
+                title: const Text('1:1 Chat'),
                 onTap: () {
                   final connectedClients = messageNotifier.getClients();
                   Navigator.push(
