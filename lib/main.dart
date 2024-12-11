@@ -115,6 +115,7 @@ void main() {
   runApp(
     ProviderScope(
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: FirstView(),
       ),
     ),

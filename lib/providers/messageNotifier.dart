@@ -36,18 +36,20 @@ List<String> getClients() {
 }
 
 
-  void sendGroupMessage(String name) {
-    if (groupTextController.text.isNotEmpty) {
-      final message = Message(
-        text: groupTextController.text,
-        event: 'groupmessage',
-        from: name,
-      );
-   print("Message sent: $message");
-      _webSocketService.sendMessage(message);
-      groupTextController.clear();
-    }
+void sendGroupMessage(String name, {String? fileName, String? fileUrl}) {
+  if (groupTextController.text.isNotEmpty || fileName != null || fileUrl != null) {
+    final message = Message(
+      text: groupTextController.text,
+      event: 'groupmessage',
+      from: name,
+      fileName: fileName,
+      fileUrl: fileUrl,
+    );
+    print("Message sent: $message");
+    _webSocketService.sendMessage(message);
+    groupTextController.clear();
   }
+}
 void sendPrivateMessage(
     String from, String to, String text, {String? fileName, String? fileUrl}) {
   final message = Message(

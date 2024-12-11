@@ -4,8 +4,6 @@ import 'package:chatting_app/providers/web_socket_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-
 class HomeView extends ConsumerWidget {
   final String name;
 
@@ -17,22 +15,33 @@ class HomeView extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home View'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome, $name!',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.group),
-                title: const Text('Group Chat'),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color.fromARGB(255, 163, 137, 207), Color.fromARGB(255, 91, 109, 207)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome, $name!',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -41,25 +50,72 @@ class HomeView extends ConsumerWidget {
                     ),
                   );
                 },
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 5,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 16),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.group, color: Colors.deepPurple),
+                        const SizedBox(width: 20),
+                        const Text(
+                          'Group Chat',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('1:1 Chat'),
+              const SizedBox(height: 20),
+              GestureDetector(
                 onTap: () {
                   final connectedClients = messageNotifier.getClients();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ClientsListView(clients: connectedClients, currentUserName: name,),
+                      builder: (context) => ClientsListView(
+                        clients: connectedClients,
+                        currentUserName: name,
+                      ),
                     ),
                   );
                 },
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 5,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 16),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.person, color: Colors.deepPurple),
+                        const SizedBox(width: 20),
+                        const Text(
+                          '1:1 Chat',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
