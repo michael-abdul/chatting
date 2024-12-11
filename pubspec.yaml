@@ -37,6 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   web_socket_channel: ^2.2.0
   flutter_riverpod: ^2.6.1
+  http: ^1.2.2
+  fluttertoast: ^8.0.8
+  file_picker: ^5.2.5
 
 dev_dependencies:
   flutter_test:

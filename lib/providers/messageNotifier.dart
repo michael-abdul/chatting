@@ -48,16 +48,20 @@ List<String> getClients() {
       groupTextController.clear();
     }
   }
-  void sendPrivateMessage(String from, String to, String text) {
-    final message = Message(
-      text: text,
-      event: 'message',
-      from: from,
-      to: to,
-    );
-    print("Sending private message: ${message.text}, from: ${message.from}, to: ${message.to}");
-    _webSocketService.sendMessage(message);
-  }
+void sendPrivateMessage(
+    String from, String to, String text, {String? fileName, String? fileUrl}) {
+  final message = Message(
+    text: text,
+    event: 'message',
+    from: from,
+    to: to,
+    fileName: fileName,
+    fileUrl: fileUrl,
+  );
+  print(
+      "Sending private message: ${message.text}, from: ${message.from}, to: ${message.to}, fileName: ${message.fileName}, fileUrl: ${message.fileUrl}");
+  _webSocketService.sendMessage(message);
+}
 
   void close() {
     _webSocketService.close();
