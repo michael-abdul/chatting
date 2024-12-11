@@ -1,9 +1,10 @@
-import 'dart:io';
-import 'package:chatting_app/providers/web_socket_provider.dart';
-import 'package:chatting_app/services/upload_service.dart';
+import 'package:chatting_app/utils/file_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:chatting_app/providers/web_socket_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import 'package:chatting_app/services/upload_service.dart';
 
 class ChatView extends ConsumerWidget {
   final String currentUserName;
@@ -17,8 +18,8 @@ class ChatView extends ConsumerWidget {
 
   final TextEditingController _messageController = TextEditingController();
 
-  String? _uploadedFileName; // Yuklangan fayl nomi
-  String? _uploadedFileUrl; // Yuklangan fayl URL
+  String? _uploadedFileName;
+  String? _uploadedFileUrl;
 
   Future<void> _pickAndUploadFile(WidgetRef ref) async {
     try {
@@ -26,15 +27,12 @@ class ChatView extends ConsumerWidget {
       if (result != null) {
         final file = File(result.files.single.path!);
 
-        // Faylni yuklash
         final response = await uploadFile(file);
         if (response != null) {
           _uploadedFileName = response['fileName'];
           _uploadedFileUrl = response['fileUrl'];
 
-          // Fayl yuklanganidan so'ng TextField ichida ko'rsatish
-          _messageController.text =
-              'File: ${_uploadedFileName!} (Click send to share)';
+          _messageController.text = _uploadedFileName!;
         }
       }
     } catch (e) {
@@ -96,25 +94,28 @@ class ChatView extends ConsumerWidget {
                             Text(message.text),
                             if (message.fileName != null &&
                                 message.fileUrl != null)
-                              GestureDetector(
-                                onTap: () {
-                                  // Faylni yuklash
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Downloading ${message.fileName}...'),
+                              Row(
+                                children: [
+                                  Icon(Icons.attach_file,
+                                      size: 16, color: Colors.blue),
+                                  const SizedBox(width: 5),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await downloadAndOpenFile(
+                                        context,
+                                        message.fileUrl!,
+                                        message.fileName!,
+                                      );
+                                    },
+                                    child: Text(
+                                      message.fileName!,
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                      ),
                                     ),
-                                  );
-                                  // Faylni yuklash yoki brauzerda ochish uchun
-                                  print('File URL: ${message.fileUrl}');
-                                },
-                                child: Text(
-                                  'File: ${message.fileName}',
-                                  style: const TextStyle(
-                                    color: Colors.blue,
-                                    decoration: TextDecoration.underline,
                                   ),
-                                ),
+                                ],
                               ),
                           ],
                         ),
@@ -160,8 +161,8 @@ class ChatView extends ConsumerWidget {
                           );
 
                       _messageController.clear();
-                      _uploadedFileName = null; // Faylni tozalash
-                      _uploadedFileUrl = null; // Faylni tozalash
+                      _uploadedFileName = null;
+                      _uploadedFileUrl = null;
                     }
                   },
                 ),
